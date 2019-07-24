@@ -12,6 +12,7 @@ import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Controller
@@ -26,21 +27,35 @@ public class JspMealController {
         this.service = service;
     }
 
-    //@RequestMapping(value = "/{id}", method = RequestMethod.POST)
-    @PostMapping("/meals/create/{id}")
-    public String create(@ModelAttribute("mealForm") Meal meal){
+    @PostMapping("/meals/create/")
+    public String create(
+            //Model model,
+                         @ModelAttribute LocalDateTime dateTime,
+                         @ModelAttribute String description,
+                         @ModelAttribute Integer calories){
+        Meal meal = new Meal(dateTime, description, calories);
+        meal.isNew();
         log.debug("create {}", meal);
         int userId = SecurityUtil.authUserId();
         service.create(meal, userId);
+        //model.addAttribute("mealForm", service.create(meal,userId));
         return "redirect:/meals";
     }
 
     //@RequestMapping(value = "/{id}", method = RequestMethod.POST)
     @PostMapping("/meals/update/{id}")
-    public String update(@ModelAttribute("mealForm") Meal meal){
+    public String update(
+            //Model model,
+                         @PathVariable("id") int id,
+                         @ModelAttribute LocalDateTime dateTime,
+                         @ModelAttribute String description,
+                         @ModelAttribute Integer calories){
+        Meal meal = new Meal(id,dateTime, description, calories);
+        //meal.setId(id);
         log.debug("update {}", meal);
         int userId = SecurityUtil.authUserId();
         service.update(meal, userId);
+        //model.addAttribute("mealForm", service.update(meal,userId));
         return "redirect:/meals";
     }
 
@@ -51,11 +66,11 @@ public class JspMealController {
         return "redirect:/meals";
     }
 
-    @GetMapping("/meals/get/{id}")
+    @GetMapping("/meals/{id}")
     public String get(Model model, @PathVariable("id") int id){
         int userId = SecurityUtil.authUserId();
         model.addAttribute("meal", service.get(id, userId));
-        return "meals/{id}";
+        return "redirect:/meals/{id}";
     }
 
     @GetMapping("/meals")
